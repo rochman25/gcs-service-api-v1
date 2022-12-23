@@ -18,9 +18,12 @@ var (
 )
 
 func HandleFileUploadToBucket(c *gin.Context) {
-	bucket := "komship-bucket"
-
 	var err error
+
+	var request FileRequest
+	err = c.Bind(&request)
+
+	bucket := c.Request.Form.Get("bucket-name")
 
 	ctx := appengine.NewContext(c.Request)
 
@@ -80,17 +83,16 @@ func HandleFileUploadToBucket(c *gin.Context) {
 }
 
 func GetListFile(c *gin.Context) {
-
-	bucket := "komship-bucket"
-
 	var err error
+
+	var request FileRequest
+	err = c.BindJSON(&request)
+
+	bucket := request.BucketName
 
 	ctx := appengine.NewContext(c.Request)
 
 	storageClient, err = storage.NewClient(ctx, option.WithCredentialsFile("komerce-be-e1e0765a0e23.json"))
-
-	var request FileRequest
-	c.BindJSON(&request)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -127,9 +129,12 @@ func GetListFile(c *gin.Context) {
 }
 
 func GetListFolder(c *gin.Context) {
-	bucket := "komship-bucket"
-
 	var err error
+
+	var request FileRequest
+	err = c.BindJSON(&request)
+
+	bucket := request.BucketName
 
 	ctx := appengine.NewContext(c.Request)
 
@@ -173,6 +178,7 @@ func GetListFolder(c *gin.Context) {
 }
 
 type FileRequest struct {
+	BucketName string `json:"bucket-name" binding:"required"`
 	FolderName string `json:"folder-name"`
 }
 
